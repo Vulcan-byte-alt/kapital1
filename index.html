@@ -2205,22 +2205,22 @@
                 <p class="section-description">Join our team of talented professionals dedicated to excellence in
                     investment management.</p>
             </div>
-
+    
             <div class="contact-grid">
                 <div class="contact-form" id="careersForm">
                     <h3 class="chart-title">Upload Your Resume</h3>
                     <br>
-                    <form id="careerForm">
+                    <form id="careerForm" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="name" class="form-label">Full Name</label>
                             <input type="text" id="name" name="name" class="form-control" required>
                         </div>
-
+    
                         <div class="form-group">
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" id="email" name="email" class="form-control" required>
                         </div>
-
+    
                         <div class="form-group">
                             <label for="position" class="form-label">Position of Interest</label>
                             <select id="position" name="position" class="form-control" required>
@@ -2232,19 +2232,42 @@
                                 <option value="other">Other</option>
                             </select>
                         </div>
-
+    
+                        <div class="form-group">
+                            <label for="resume" class="form-label">Resume (PDF)</label>
+                            <div class="file-upload-dropzone">
+                                <input type="file" id="resume" name="resume" class="file-input" accept=".pdf,.doc,.docx"
+                                    required>
+                                <div class="dropzone-content">
+                                    <div class="file-icon">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="dropzone-text">
+                                        Drag and drop or click to upload
+                                    </div>
+                                    <div class="file-name-display"></div>
+                                </div>
+                            </div>
+                            <div class="file-requirements">
+                                <small>Accepted formats: PDF, DOC, DOCX (Max 5MB)</small>
+                            </div>
+                        </div>
+    
                         <div class="form-group">
                             <label for="message" class="form-label">Cover Letter / Message</label>
                             <textarea id="message" name="message" rows="4" class="form-control" required></textarea>
                         </div>
-
+    
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Submit Application <i
-                                    class="fas fa-paper-plane btn-icon"></i></button>
+                            <div class="submit-container">
+                                <button type="submit" class="btn btn-primary">Submit Application <i
+                                        class="fas fa-paper-plane btn-icon"></i></button>
+                                <div class="submit-status" id="submitStatus"></div>
+                            </div>
                         </div>
                     </form>
                 </div>
-
+    
                 <div class="contact-info" id="careersInfo">
                     <h3 class="chart-title">Open Positions</h3>
                     <br>
@@ -2258,7 +2281,7 @@
                                 investment opportunities.</p>
                         </div>
                     </div>
-
+    
                     <div class="contact-info-item">
                         <div class="contact-info-icon">
                             <i class="fas fa-laptop-code"></i>
@@ -2269,7 +2292,7 @@
                                 tools.</p>
                         </div>
                     </div>
-
+    
                     <div class="contact-info-item">
                         <div class="contact-info-icon">
                             <i class="fas fa-tasks"></i>
@@ -2284,7 +2307,269 @@
             </div>
         </div>
     </section>
+    
+    <!-- CSS styles for file upload -->
+    <style>
+        .file-upload-dropzone {
+            border: 2px dashed #ced4da;
+            border-radius: 4px;
+            background-color: rgba(0, 123, 255, 0.05);
+            position: relative;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            transition: border-color 0.3s, background-color 0.3s;
+            cursor: pointer;
+        }
+    
+        .file-upload-dropzone:hover,
+        .file-upload-dropzone.dragover {
+            border-color: #007bff;
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+    
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+    
+        .dropzone-content {
+            text-align: center;
+            width: 100%;
+            padding: 20px;
+        }
+    
+        .file-icon {
+            font-size: 36px;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+    
+        .dropzone-text {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    
+        .file-name-display {
+            font-size: 14px;
+            color: #007bff;
+            margin-top: 8px;
+            word-break: break-word;
+        }
+    
+        .file-upload-dropzone.has-file .file-icon,
+        .file-upload-dropzone.has-file .dropzone-text {
+            display: none;
+        }
+    
+        .file-requirements {
+            font-size: 12px;
+            color: #6c757d;
+        }
+    
+        .submit-container {
+            display: flex;
+            align-items: center;
+        }
+    
+        .submit-status {
+            margin-left: 15px;
+            font-size: 14px;
+        }
+    
+        .status-success {
+            color: #28a745;
+        }
+    
+        .status-error {
+            color: #dc3545;
+        }
+    
+        .file-upload-progress {
+            width: 100%;
+            height: 4px;
+            margin-top: 5px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            display: none;
+        }
+    
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+    
+    <!-- JavaScript for file upload functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // File upload interaction
+            const fileInput = document.getElementById('resume');
+            const dropzone = document.querySelector('.file-upload-dropzone');
+            const fileNameDisplay = document.querySelector('.file-name-display');
+            const form = document.getElementById('careerForm');
+            const submitStatus = document.getElementById('submitStatus');
 
+            // Handle file selection
+            fileInput.addEventListener('change', function () {
+                handleFileSelection(this.files);
+            });
+
+            // Handle drag and drop events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropzone.classList.add('dragover');
+            }
+
+            function unhighlight() {
+                dropzone.classList.remove('dragover');
+            }
+
+            dropzone.addEventListener('drop', function (e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFileSelection(files);
+            });
+
+            function handleFileSelection(files) {
+                if (files && files[0]) {
+                    const file = files[0];
+
+                    // Check file size (5MB limit)
+                    if (file.size > 5 * 1024 * 1024) {
+                        fileNameDisplay.textContent = 'File is too large (max 5MB)';
+                        fileNameDisplay.style.color = '#dc3545';
+                        fileInput.value = '';  // Clear the file input
+                        dropzone.classList.remove('has-file');
+                        return;
+                    }
+
+                    // Check file type
+                    const validTypes = ['.pdf', '.doc', '.docx', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                    const fileType = file.type;
+                    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+                    if (!validTypes.includes(fileType) && !validTypes.includes(fileExtension)) {
+                        fileNameDisplay.textContent = 'Invalid file type (PDF, DOC, DOCX only)';
+                        fileNameDisplay.style.color = '#dc3545';
+                        fileInput.value = '';  // Clear the file input
+                        dropzone.classList.remove('has-file');
+                        return;
+                    }
+
+                    // Display file name
+                    fileNameDisplay.textContent = file.name;
+                    fileNameDisplay.style.color = '#007bff';
+                    dropzone.classList.add('has-file');
+                } else {
+                    fileNameDisplay.textContent = '';
+                    dropzone.classList.remove('has-file');
+                }
+            }
+
+            // Clicking on the dropzone should trigger the file input
+            dropzone.addEventListener('click', function (e) {
+                // Prevent clicking the input from triggering this again
+                if (e.target !== fileInput) {
+                    fileInput.click();
+                }
+            });
+
+            // Form submission
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Validate all required fields
+                const requiredInputs = form.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredInputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        isValid = false;
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    submitStatus.textContent = 'Please fill in all required fields';
+                    submitStatus.className = 'submit-status status-error';
+                    return;
+                }
+
+                // Create FormData object to handle file upload
+                const formData = new FormData(form);
+
+                // Simulating form submission with AJAX
+                submitStatus.textContent = 'Submitting application...';
+                submitStatus.className = 'submit-status';
+
+                // In a real implementation, you would use AJAX to send formData to your server
+                // For demonstration, we'll simulate a successful submission after a short delay
+                setTimeout(function () {
+                    submitStatus.textContent = 'Application submitted successfully!';
+                    submitStatus.className = 'submit-status status-success';
+                    form.reset();
+                    fileName.textContent = 'No file chosen';
+                }, 1500);
+
+                // Example AJAX implementation (commented out)
+                /*
+                fetch('/api/submit-application', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        submitStatus.textContent = 'Application submitted successfully!';
+                        submitStatus.className = 'submit-status status-success';
+                        form.reset();
+                        fileName.textContent = 'No file chosen';
+                    } else {
+                        submitStatus.textContent = data.message || 'Error submitting application';
+                        submitStatus.className = 'submit-status status-error';
+                    }
+                })
+                .catch(error => {
+                    submitStatus.textContent = 'Network error, please try again';
+                    submitStatus.className = 'submit-status status-error';
+                    console.error('Error:', error);
+                });
+                */
+            });
+        });
+    </script>
+    
     <!-- Disclaimer Section - Light Background (switched from dark) -->
     <section id="disclaimer" class="section section-light">
         <div class="container">
